@@ -8,6 +8,14 @@ const page = () => {
   const router = useRouter();
   const [first, setfirst] = useState({name:"",email:'',password:''});
   const submit = async()=>{
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(first.email)){
+alert("please enter valid email id");
+return
+     }
+    if(first.name==""||first.email==""||first.password==""){
+      alert("please fill the require field....")
+      return
+    }
  let sucess = await register(first.email,first.name,first.password);
  if(sucess?.sucess){
   router.push("/login")
@@ -58,8 +66,7 @@ const page = () => {
           placeholder="Enter your password"
         />
       </div>
-
-      <button className="register_btn" onClick={submit}>
+        <button type='submit' className="register_btn" onClick={submit}>
         Register
       </button>
     </div>
