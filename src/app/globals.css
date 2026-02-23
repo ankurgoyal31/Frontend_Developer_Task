@@ -338,3 +338,8 @@ html, body {
     padding: 25px;
   }
 }
+.register_btn_style{
+text-decoration: none;
+color: #10b981;
+ border-radius: 10px;
+  }
