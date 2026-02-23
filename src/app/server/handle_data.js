@@ -21,10 +21,10 @@ export const register = async(email,name,password)=>{
   let {new_user} =await connect(); 
     let check =await new_user.findOne({email});
     if(check){
-        return "all ready exist";
+        return "allready exist";
     }
     let hide_password = await bcrypt.hash(password, 10);
-     await new_user.insertOne({email,name,hide_password,password});
+     await new_user.insertOne({email,name,hide_password});
     return {sucess:true}
     }catch{
     return {sucess:false}
@@ -36,7 +36,7 @@ export const login =async (email,password)=>{
 let {new_user} = await connect();
 let check_user = await new_user.findOne({email});
 if(!check_user ){
-return "401,not found.."
+return {sucess:false}
 }
  
 const isMatch = await bcrypt.compare(password,check_user.hide_password);
@@ -49,7 +49,6 @@ return {sucess:true,token:genrate_token,name:check_user.name,email:check_user.em
          return {sucess:false}
     }
  }
-
 export  const Dashboard = async(token)=> {
 if(!token){
     return "empty"
