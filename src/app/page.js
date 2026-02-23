@@ -1,65 +1,146 @@
-import Image from "next/image";
+"use client"
+import React from 'react'
+ import { useEffect,useState } from 'react'
+ import { Dashboard } from './server/handle_data'
+import { user_task_delete } from './server/handle_data'
+import { user_task } from './server/handle_data'
+import { get_user_data } from './server/handle_data'
+import { update } from './server/handle_data'
+import Navbar from '../../navbar/nav'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+const page = () => {
+  const router = useRouter()
+  const [task,set_task] = useState("");
+  const[all_task,set_all_task] = useState([]);
+   const[index,set_index] = useState({index:null,id:null})
+   const[show_update,set_show_update] = useState(false)
+   const[show_button,set_button] = useState(true)
+const [loader,set_loader] = useState(false)
+const [error,set_error] = useState(null)
+  async function Get_data() {
+  if(!user_email) return;
+  set_loader(true);
+  set_error(null);
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+  try {
+    let data = await get_user_data(user_email);
+
+    if(!data?.data || data.data.length === 0){
+      set_error("No Task Found");
+      set_all_task([]);
+     } else {
+      set_all_task(data.data);
+    }
+  } catch(err){
+    set_error("Something went wrong");
+  }
+
+  set_loader(false);
+ 
+  }
+  const[user_email,set_user_email] = useState(null)
+    useEffect(() => {
+      let check_token = localStorage.getItem("user_token")
+      if(!check_token){
+        set_button(false)
+         return
+      }
+        new Promise((resolve, reject) => {
+        let data = Dashboard(localStorage.getItem("user_token")) 
+         resolve(data)} ).then((data)=>{set_user_email(data.email)}).catch((e)=>
+        {return "something went wrong"});
+            }, [])
+useEffect(() => {
+  if(!user_email) return
+  Get_data();
+}, [ user_email])
+
+     const create = async ()=>{
+      if(task===""){
+        alert("please the require field....")
+        return
+      }
+
+    alert("sucessfully create your task");
+     let data =  await user_task(task,user_email);
+     Get_data();
+     set_task("")
+     }
+    function user_update() {
+ let upadated = [...all_task]
+ upadated[index.index].task = task;
+ set_all_task(upadated)
+update(index.id,task);
+set_show_update(false)
+set_task("")
+     }
+     const edit = (id,edit_task,index_value)=>{
+      set_task(edit_task)
+     set_index({index:index_value,id:id});
+     set_show_update(true)
+      }  
+      const task_delete=(id)=>{
+      user_task_delete(id)
+      Get_data();
+      }
+    return (
+            <>
+  <Navbar />
+
+  <div className="container">
+    <div className="card">
+      <h1 className="title">Create Your Task</h1>
+
+      <div className="input_section">
+        <input
+          className="input_field"
+          value={task}
+          type="text"
+          onChange={(e) => set_task(e.target.value)}
+          placeholder="Enter your task..."
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        {!show_button && <> <Link href={"/login"}><button className= "primary_btn">Login To Craete</button></Link></>   }
+        {!show_update && show_button && (
+          <button className="primary_btn" onClick={create}>
+            Create
+          </button>
+        )}
+          {show_update && (
+          <button className="update_btn" onClick={user_update}>
+            Update
+          </button>
+        )}
+      </div>
     </div>
-  );
+ {loader &&<h2>Loading...</h2>}
+  {error && <h2>{error}</h2>}
+     <div className="task_list">
+      {all_task &&
+        all_task.map((item, i) => (
+          <div key={item._id} className="task_card">
+            <div className="task_text">{item.task}</div>
+
+            <div className="task_actions">
+       <button
+            className="delete_btn"
+                onClick={() => task_delete(item._id)}
+              >
+                Delete
+              </button>
+
+              <button
+                className="edit_btn"
+                onClick={() => edit(item._id, item.task, i)}
+              >
+                Edit
+              </button>
+            </div>
+          </div>
+        ))}
+    </div>
+  </div>
+</>
+   )
 }
+export default page
