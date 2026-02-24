@@ -189,7 +189,9 @@ html, body {
     align-items: flex-start;
     gap: 10px;
   }
-
+.logo{
+  font-size: 18px;
+}
   .input_section {
     flex-direction: column;
   }
